@@ -1,0 +1,25 @@
+#include "keys.h"
+#include <iostream>
+
+
+////////////////////////////////////////////////////////////////////////////////
+Keys::Keys() {}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void Keys::down( const int key )
+{
+    if ( key < 0 || key > 255 )
+        return;
+
+    std::cout << key << std::endl;
+
+    pressed_.clear();
+    pressed_.insert( key );
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+bool Keys::isPressed( const int key ) const {
+    return pressed_.find( key ) != pressed_.end();
+}
