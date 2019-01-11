@@ -34,21 +34,23 @@ int main(int argc, char* argv[])
 
     std::string filename;
 
-    if ( argc >= 3 && std::string( argv[1] ) == "-i")
-        filename = argv[2];
+    // if ( argc >= 3 && std::string( argv[1] ) == "-i")
+    //     filename = argv[2];
+    if ( argc >= 2 )
+        filename = argv[1];
 
     Timer timer;
     cv::VideoCapture video( filename );
 
     const size_t from = 0;
     const int to = -1;
-    video.set( CV_CAP_PROP_POS_FRAMES, from );
+    video.set( cv::CAP_PROP_POS_FRAMES, from );
 
     cv::Mat frame;
     // std::vector<cv::ocl::oclMat> frames;
     std::vector<cv::Mat> frames;
 
-    const size_t frameCount = video.get( CV_CAP_PROP_FRAME_COUNT );
+    const size_t frameCount = video.get( cv::CAP_PROP_FRAME_COUNT );
     std::cout << frameCount << " frames found" << std::endl;
     std::cout << "loading frames ... " << std::endl;
 
@@ -56,13 +58,13 @@ int main(int argc, char* argv[])
 
     while ( video.read( frame ) )
     {
-        const size_t curr = video.get( CV_CAP_PROP_POS_FRAMES );
+        const size_t curr = video.get( cv::CAP_PROP_POS_FRAMES );
 
         if ( curr > to && to >= 0 )
             break;
 
         cv::Mat preview;
-        cv::resize( frame, preview, cv::Size(), 0.5, 0.5, CV_INTER_CUBIC );
+        cv::resize( frame, preview, cv::Size(), 0.5, 0.5, cv::INTER_CUBIC );
 
         frames.push_back( preview );
         // cv::ocl::oclMat oclPreview( preview );
