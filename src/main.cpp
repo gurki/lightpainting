@@ -32,7 +32,8 @@ int main(int argc, char* argv[])
 
     //  read frames
 
-    std::string filename;
+    const std::string filebase = "etc-tinyplanet";
+    std::string filename = ROOT_PATH "data/" + filebase + ".mp4";
 
     // if ( argc >= 3 && std::string( argv[1] ) == "-i")
     //     filename = argv[2];
@@ -51,10 +52,18 @@ int main(int argc, char* argv[])
     std::vector<cv::Mat> frames;
 
     const size_t frameCount = video.get( cv::CAP_PROP_FRAME_COUNT );
+    const double fps = video.get( cv::CAP_PROP_FPS );
+    const int width = video.get( cv::CAP_PROP_FRAME_WIDTH );
+    const int height = video.get( cv::CAP_PROP_FRAME_HEIGHT );
     std::cout << frameCount << " frames found" << std::endl;
     std::cout << "loading frames ... " << std::endl;
 
     cv::namedWindow( "output" );
+    cv::Mat composite;
+
+    const int fourcc = cv::VideoWriter::fourcc( 'h', '2', '6', '4');
+    const cv::Size size = { width, height };
+    cv::VideoWriter writer( ROOT_PATH + filebase + ".mp4", fourcc, fps, size );
 
     while ( video.read( frame ) )
     {
@@ -70,13 +79,25 @@ int main(int argc, char* argv[])
         // cv::ocl::oclMat oclPreview( preview );
         // frames.push_back( oclPreview );
 
-        // cv::imshow( "output", preview );
-        // cv::waitKey( 10 );
+        if ( composite.empty() ) {
+            composite = frame.clone();
+        } else {
+            cv::max( frame, composite, composite );
+        }
+
+
+        if ( curr % 16 == 0 ) {
+            writer.write( composite );
+        }
+
+        cv::imshow( "output", composite );
+        cv::waitKey( 1 );
 
         const float t = std::round( 10000 * curr / (float)frameCount ) / 100.f;
         std::cout << t << "% (" << curr << ")" << std::endl;
     }
 
+    cv::imwrite( ROOT_PATH + filebase + ".png", composite );
     timer.toc();
 
     if ( frames.empty() ) {
@@ -85,10 +106,12 @@ int main(int argc, char* argv[])
     }
 
     std::cout << "read " << frames.size() << " frames" << std::endl;
+    cv::waitKey();
+    return EXIT_SUCCESS;
 
     //  reduce frames
 
-    const cv::Size size = frames[ 0 ].size();
+    // const cv::Size size = frames[ 0 ].size();
     int left = 0, right = 1;
     int key = 0;
     int step = 1;
@@ -96,7 +119,7 @@ int main(int argc, char* argv[])
     Keys keys;
 
     // cv::ocl::oclMat oclComposite = cv::ocl::oclMat( size, frame.type() );
-    cv::Mat composite = cv::Mat( size, frame.type() );
+    // cv::Mat composite = cv::Mat( size, frame.type() );
 
     do
     {
@@ -104,11 +127,11 @@ int main(int argc, char* argv[])
         right = std::min( (int)frames.size(), std::max( 1, right ) );
         left = std::min( left, right - 1 );
 
-        composite.setTo( 0 );
+        // composite.setTo( 0 );
 
         timer.tic();
-        reduceMax( frames.begin() + left, frames.begin() + right, composite );
         // oclReduceMax( frames.begin() + left, frames.begin() + right, oclComposite );
+        // reduceMax( frames.begin(), frames.end(), composite );
 
         // std::cout << "window: ( " << left << ", " << right << " ), dt: " << timer.tac() << std::endl;
 

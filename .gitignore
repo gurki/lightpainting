@@ -1,4 +1,7 @@
-build/
+.vscode/
+.build/
+*.DS_Store
 resources/
 screenshots/
-.vscode/
+data/
+results/
